@@ -3,12 +3,13 @@ from map import Map, CellType
 from pygame import Color, Rect
 
 CELL_TYPE_COLORS = {
-  CellType.Empty : Color('#ffffff'),
+  CellType.Empty : Color('#f2f2f2'),
   CellType.Wall : Color('#444444'),
   CellType.Store : Color('#4990d8'),
   CellType.Item : Color('#FFD700'),
   CellType.Entrance : Color('#2bcc6f'),
-  CellType.Exit : Color('#e74b3d')
+  CellType.Exit : Color('#e74b3d'),
+  CellType.Robot : Color('#BC6C25')
 }
 
 class Renderer:

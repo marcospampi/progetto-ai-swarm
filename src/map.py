@@ -4,9 +4,9 @@ import numpy as np
 
 class CellType(IntEnum):
   # Corridoio
-  Empty = 0,
+  Empty = 0
   # Muro / Scaffale
-  Wall = 1,
+  Wall = 1
   # Magazzino
   Store = 2
   # Oggetto
@@ -15,6 +15,8 @@ class CellType(IntEnum):
   Entrance = 4
   # Uscita
   Exit = 5
+  # Robot
+  Robot = 6
 
 
 @dataclass

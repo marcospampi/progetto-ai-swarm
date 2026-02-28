@@ -1,18 +1,25 @@
 import pygame
 from map import Map, CellType
 from rendering import Renderer
+from projectUtils import *  
 
+mymap = Map(24,24)
+bot = Agente(Pose(1, 1), Visibility(2, 0, False), 100, Map(25, 25), Strategy(1,1, 100, 0))
+
+def loop():
+    
+    mymap.set_cell((bot.position.x, bot.position.y), 0)
+    bot.action()
+    mymap.set_cell((bot.position.x, bot.position.y), 6)
+    pygame.time.delay(100) 
+    pass
 
 def main():
-
-  mymap = Map(24,24)
+ 
 
   
 
   renderer = Renderer(mymap)
-
-  def loop():
-    pass
 
   renderer.run_in_loop(loop)
 
