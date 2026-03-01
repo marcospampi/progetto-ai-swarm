@@ -3,6 +3,7 @@ from map import Map, CellType
 from pygame import Color, Rect
 
 CELL_TYPE_COLORS = {
+  CellType.unknown : Color('#000000'),
   CellType.Empty : Color('#f2f2f2'),
   CellType.Wall : Color('#444444'),
   CellType.Store : Color('#4990d8'),

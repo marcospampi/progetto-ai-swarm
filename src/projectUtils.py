@@ -27,7 +27,7 @@ class Visibility:
         visited = {(position.x, position.y)}
         queue = deque([(position.x, position.y, 0)])
         
-        localMap[position.x, position.y] = grid[position.x, position.y]
+        #localMap.set_cell((position.x, position.y), grid[position.x, position.y]) 
 
         while queue:
             r, c, deep = queue.popleft()
@@ -39,8 +39,8 @@ class Visibility:
                 nr, nc = r + dr, c + dc
 
                 if 0 <= nr < rows and 0 <= nc < cols and (nr, nc) not in visited:
-                    visited.add((nr, nc))
-                    localMap[nr, nc] = grid[nr, nc]
+                    visited.add((nr, nc)) 
+                    localMap.set_cell((nr, nc), grid[nr, nc])
                     
                     if grid[nr, nc] == 0 or self.xRays:
                         queue.append((nr, nc, deep + 1))
@@ -83,7 +83,8 @@ class Agente:
         self.localMap = localMap_
         self.strategy = strategy_
 
-    def action(self): 
+    def action(self, Map): 
+        self.visibility.update(self.position, self.localMap, Map.grid)
         res = self.strategy.next_move(self.position, self.localMap)
         if res is None: return
 
@@ -94,3 +95,6 @@ class Agente:
             self.position.x = new_x
         if 0 <= new_y < self.localMap.grid.shape[1]:
             self.position.y = new_y
+
+    def printMap(self):
+        self.localMap.print_map()
