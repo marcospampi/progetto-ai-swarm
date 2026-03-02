@@ -40,7 +40,9 @@ class Visibility:
 
                 if 0 <= nr < rows and 0 <= nc < cols and (nr, nc) not in visited:
                     visited.add((nr, nc)) 
-                    localMap.set_cell((nr, nc), grid[nr, nc])
+
+                    #localMap.set_cell((nr, nc), grid[nr, nc])
+                    localMap.set_cell((nr, nc), 0)
                     
                     if grid[nr, nc] == 0 or self.xRays:
                         queue.append((nr, nc, deep + 1))

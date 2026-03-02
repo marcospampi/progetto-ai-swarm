@@ -30,7 +30,7 @@ class Map:
     self.grid = np.zeros(shape=(grid_width, grid_height), dtype=CellType)
     self.grid_metadata = {}
 
-  def __init__(self, grid_width: int, grid_height: int, value: int = -1): 
+  def __init__(self, grid_width: int, grid_height: int, value: int = 0): 
         self.grid = np.full((grid_width, grid_height), value, dtype=int)
         self.grid_metadata = {}
   

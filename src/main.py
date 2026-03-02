@@ -5,17 +5,17 @@ from projectUtils import *
 
 mymap = Map(25,25)
 bot = Agente(Pose(1, 1), Visibility(3, 0, False), 100, Map(25, 25, -1), Strategy(1,1, 100, 0))
-t = 100
 
 def loop():
     global t
     if t <= 0: return 
     mymap.set_cell((bot.position.x, bot.position.y), 0)
+    bot.localMap.set_cell((bot.position.x, bot.position.y), 0)
     bot.action(mymap)
+    bot.localMap.set_cell((bot.position.x, bot.position.y), 6)
     mymap.set_cell((bot.position.x, bot.position.y), 6)
     pygame.time.delay(50)
     bot.printMap() 
-    t = t - 1
 
 def main():
  
