@@ -20,7 +20,7 @@ class Position:
 
 class Visibility:
     #aggiorna la mappa locale in base al raggio visivo
-    def __init__(self, reach: int, x_rays: bool = False) -> None:
+    def __init__(self, reach: int, radius: int, x_rays: bool = False) -> None:
         self.reach = reach
         self.x_rays = x_rays
     

@@ -31,18 +31,18 @@ class Map:
     self.grid_metadata = {}
 
   def __init__(self, grid_width: int, grid_height: int, value: int = 0): 
-        self.grid = np.full((grid_width, grid_height), value, dtype=int)
-        self.grid_metadata = {}
+    self.grid = np.full((grid_width, grid_height), value, dtype=int)
+    self.grid_metadata = {}
   
-  def set_cell(self, position: tuple[int,int], cell_type: CellType, meta = None):
+  def set_cell(self, position: tuple[int,int], cell_type: CellType, meta = None) -> None:
     self.grid[position] = cell_type
     if meta:
       self.grid_metadata[position] = meta
 
-  def get_cell(self, position: tuple[int,int], cell_type: CellType, meta = None):
-    return cell_type 
+  def get_cell(self, position: tuple[int,int]) -> CellType:
+    return self.grid[position]
 
-  def print_map(self):  
+  def print_map(self) -> None:  
         symbols = {0: " . ", 1: "###", -1: "   "} # 0: Vuoto, 1: Muro, 6: Robot
         
         print("-" * (self.grid.shape[1] * 3))
