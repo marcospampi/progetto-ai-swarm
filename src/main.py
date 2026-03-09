@@ -1,8 +1,8 @@
 import argparse
-import time
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colors
+import time
 
 from projectUtils import Agente, Position, Visibility, Strategy
 from map import Map, CellType
@@ -15,48 +15,67 @@ def main():
 
     grid, warehouses, objects_truth = parse_json.load_environment(args.mappa_json)
 
-    map_colors = [
-        '#f2f2f2',
-        '#444444',
-        '#4990d8',
-        '#2bcc6f',
-        '#e74b3d'
+    global_map_colors = [
+        '#f2f2f2', # 0: EMPTY
+        '#444444', # 1: WALL
+        '#4990d8', # 2: STORE
+        '#2bcc6f', # 3: ENTRANCE
+        '#e74b3d', # 4: EXIT
+        '#FFD700'  # 5: ITEM
     ]
+    global_cmap = colors.ListedColormap(global_map_colors)
+    global_bounds = [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5] 
+    global_norm = colors.BoundaryNorm(global_bounds, global_cmap.N)
 
-    cmap_consegna = colors.ListedColormap(map_colors)
-    bounds = [0, 1, 2, 3, 4, 5]
-    norm = colors.BoundaryNorm(bounds, cmap_consegna.N)
+    local_map_colors = ['#000000'] + global_map_colors + ['#BC6C25'] 
+    
+    local_cmap = colors.ListedColormap(local_map_colors)
+    local_bounds = [-1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5] 
+    local_norm = colors.BoundaryNorm(local_bounds, local_cmap.N)
+
 
     rows = len(grid)
     cols = len(grid[0]) if rows > 0 else 0
-
     global_map = Map(rows, cols)
     global_map.grid = np.array(grid)
 
-    fig, ax = plt.subplots(figsize=(8, 8))
+    fig, (ax_global, ax_local) = plt.subplots(1, 2, figsize=(16, 8)) 
     plt.ion()
 
     max_ticks = 100
 
     agents = [Agente(
         Position(0, 0), 
-        Visibility(3, 0, False), 
+        Visibility(reach=3, radius=0, x_rays=False), 
         100, 
-        Map(rows, cols), 
+        Map(rows, cols, value=-1),
         Strategy(1, 1, 100, 0)
     )]
 
     for tick in range(max_ticks):
-        ax.clear()
+        ax_global.clear()
+        ax_local.clear()
         
-        ax.imshow(global_map.grid, cmap=cmap_consegna, norm=norm, origin='upper') 
+        ax_global.imshow(global_map.grid, cmap=global_cmap, norm=global_norm, origin='upper') 
+        ax_global.set_title(f"Mappa Globale - Tick {tick}")
+        ax_global.legend([plt.Line2D([0], [0], marker='o', color='orange', linestyle='')], ['Agente'], loc="upper right")
 
         for agent in agents:
             agent.action(global_map)
-            ax.plot(agent.position.y, agent.position.x, "s", markersize=10, color='#BC6C25', label="Agente")
             
-        ax.set_title(f"Tick {tick}")
-        ax.legend(loc="upper right", fontsize=7)
+            ax_global.plot(agent.position.y, agent.position.x, "o", markersize=10, color='orange')
+            
+
+        ax_local.imshow(agents[0].local_map.grid, cmap=local_cmap, norm=local_norm, origin='upper')
+        ax_local.set_title(f"Mappa Locale (Percezione) - Tick {tick}")
+        
+
+        for agent in agents:
+             ax_local.plot(agent.position.y, agent.position.x, "o", markersize=10, color='orange')
+
+
+        ax_local.tick_params(axis='both', which='both', length=0, labelsize=0)
+
         plt.pause(0.05)
 
     plt.ioff()

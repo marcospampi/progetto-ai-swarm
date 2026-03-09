@@ -3,21 +3,13 @@ from enum import Enum, IntEnum
 import numpy as np
 
 class CellType(IntEnum):
-  # Sconosciuto
   unknown = -1
-  # Corridoio
   Empty = 0
-  # Muro / Scaffale
   Wall = 1
-  # Magazzino
   Store = 2
-  # Oggetto
-  Item = 3
-  # Entrata
-  Entrance = 4
-  # Uscita
-  Exit = 5
-  # Robot
+  Entrance = 3  
+  Exit = 4      
+  Item = 5      
   Robot = 6
 
 
