@@ -35,7 +35,7 @@ class Map:
     return self.grid[position]
 
   def print_map(self) -> None:  
-        symbols = {0: " . ", 1: "###", -1: "   "} # 0: Vuoto, 1: Muro, 6: Robot
+        symbols = {0: " . ", 1: "###", -1: "   "}
         
         print("-" * (self.grid.shape[1] * 3))
         for row in self.grid: 
