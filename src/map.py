@@ -39,8 +39,8 @@ class Map:
     if meta:
       self.grid_metadata[position] = meta
 
-  def get_cell(self, position: tuple[int,int], cell_type: CellType, meta = None):
-    return cell_type 
+  def get_cell(self, position: tuple[int,int], meta = None):
+    return self.grid[position] 
 
   def print_map(self):  
         symbols = {0: " . ", 1: "###", -1: "   "} # 0: Vuoto, 1: Muro, 6: Robot
