@@ -12,7 +12,7 @@ class Position:
     def euclidean_distance_to(self, other: 'Position') -> float:
         return math.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
 
-#il radius direi di implementarlo in un'altra classe "CommunicationSensor"
+#il radius direi di implementarlo in un'altra classe CommunicationSensor
 class VisibilitySensor:
     def __init__(self, reach: int, x_rays: bool = False):
         self.reach = reach
@@ -40,7 +40,7 @@ class CommunicationSensor:
     def __init__(self, radius: float):
         self.radius = radius
         
-    def communicate(self, self_agent, agents: list):
+    def update(self, self_agent, agents: list):
         for other_agent in agents:
             if other_agent is self_agent:
                 continue

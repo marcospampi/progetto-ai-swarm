@@ -54,7 +54,7 @@ def main():
             CommunicationSensor(radius=4.0),
             100, 
             Map(rows, cols, value=-1),
-            Strategy(1, 1, 100, 0.8)
+            Strategy(100, 0.8)
         ), 
         Agente(
             Position(rows - 1, cols - 1), 
@@ -62,7 +62,7 @@ def main():
             CommunicationSensor(radius=4.0),
             100, 
             Map(rows, cols, value=-1),
-            Strategy(cols - 2, cols - 2, 100, 0.8)
+            Strategy(100, 0.8)
         ), 
         Agente(
             Position(0, cols - 1), 
@@ -70,7 +70,7 @@ def main():
             CommunicationSensor(radius=4.0),
             100, 
             Map(rows, cols, value=-1),
-            Strategy(1, cols - 2, 100, 0.8)
+            Strategy(100, 0.8)
         ), 
         Agente(
             Position(rows - 1, 0), 
@@ -78,7 +78,7 @@ def main():
             CommunicationSensor(radius=4.0),
             100, 
             Map(rows, cols, value=-1),
-            Strategy(rows - 2, 1, 100, 0.8)
+            Strategy(100, 0.8)
         ),
         Agente(
             Position(rows - 1, 0), 
@@ -86,7 +86,7 @@ def main():
             CommunicationSensor(radius=4.0),
             100, 
             Map(rows, cols, value=-1),
-            Strategy(rows - 2, 1, 100, 0.8)
+            Strategy(100, 0.8)
         )
     ]
 
@@ -102,7 +102,7 @@ def main():
     
     plt.ion()
 
-    max_ticks = 40
+    max_ticks = 100
     
     agent_colors = ['orange', 'cyan', 'magenta', 'red']
 
