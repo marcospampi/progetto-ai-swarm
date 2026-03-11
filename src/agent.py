@@ -11,11 +11,13 @@ class Agente:
         self.communication_sensor = communication_sensor
         self.local_map = local_map
         self.strategy = strategy
+        self.carring = False # Angelo
+
 
     def action(self, agents: list['Agente'], global_map: Map):
         self.visibility_sensor.update(self.position, self.local_map, global_map)
         self.communication_sensor.update(self, agents)
-        move_vector = self.strategy.next_move(self.position, self.local_map, self.energy)
+        move_vector = self.strategy.next_move(self.position, self.local_map, self.energy, self.carring)
 
         if move_vector is None: return
 
