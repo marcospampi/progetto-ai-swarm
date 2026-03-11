@@ -3,21 +3,13 @@ from enum import Enum, IntEnum
 import numpy as np
 
 class CellType(IntEnum):
-  # Sconosciuto
   unknown = -1
-  # Corridoio
   Empty = 0
-  # Muro / Scaffale
   Wall = 1
-  # Magazzino
   Store = 2
-  # Oggetto
-  Item = 3
-  # Entrata
-  Entrance = 4
-  # Uscita
-  Exit = 5
-  # Robot
+  Entrance = 3  
+  Exit = 4      
+  Item = 5      
   Robot = 6
 
 
@@ -31,19 +23,19 @@ class Map:
     self.grid_metadata = {}
 
   def __init__(self, grid_width: int, grid_height: int, value: int = 0): 
-        self.grid = np.full((grid_width, grid_height), value, dtype=int)
-        self.grid_metadata = {}
+    self.grid = np.full((grid_width, grid_height), value, dtype=int)
+    self.grid_metadata = {}
   
-  def set_cell(self, position: tuple[int,int], cell_type: CellType, meta = None):
+  def set_cell(self, position: tuple[int,int], cell_type: CellType, meta = None) -> None:
     self.grid[position] = cell_type
     if meta:
       self.grid_metadata[position] = meta
 
-  def get_cell(self, position: tuple[int,int], meta = None):
-    return self.grid[position] 
+  def get_cell(self, position: tuple[int,int]) -> CellType:
+    return self.grid[position]
 
-  def print_map(self):  
-        symbols = {0: " . ", 1: "###", -1: "   "} # 0: Vuoto, 1: Muro, 6: Robot
+  def print_map(self) -> None:  
+        symbols = {0: " . ", 1: "###", -1: "   "}
         
         print("-" * (self.grid.shape[1] * 3))
         for row in self.grid: 
