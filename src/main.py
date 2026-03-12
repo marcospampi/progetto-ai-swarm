@@ -117,7 +117,8 @@ def main():
             r = obj.get('x', 0) if isinstance(obj, dict) else obj[0]
             c = obj.get('y', 0) if isinstance(obj, dict) else obj[1]
             
-            ax_global.plot(c, r, "o", color='#FFD700', markersize=6)
+            if global_map.grid[r, c] == 5:
+                ax_global.plot(c, r, "o", color='#FFD700', markersize=6)
 
         legend_handles = []
 
