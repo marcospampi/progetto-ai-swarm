@@ -1,10 +1,10 @@
 from geometry import Position, VisibilitySensor, CommunicationSensor
 from map import Map, CellType
-from strategy import Strategy
+from strategy import BaseStrategy
 
 
 class Agente:
-    def __init__(self, position: Position, visibility_sensor: VisibilitySensor,  communication_sensor: CommunicationSensor, energy: int, local_map: Map, strategy: Strategy):
+    def __init__(self, position: Position, visibility_sensor: VisibilitySensor,  communication_sensor: CommunicationSensor, energy: int, local_map: Map, strategy: BaseStrategy):
         self.position = position
         self.visibility_sensor = visibility_sensor
         self.energy = energy
@@ -26,10 +26,22 @@ class Agente:
         target_y = self.position.y + dy
 
         if 0 <= target_x < global_map.grid.shape[0] and 0 <= target_y < global_map.grid.shape[1]:
-            if global_map.grid[target_x, target_y] not in (CellType.Wall, CellType.Entrance):                
-                self.position.x = target_x
-                self.position.y = target_y
-                self.energy -= 1
+            #logica di non sovrapposizione tra agenti
+            if global_map.grid[target_x, target_y] not in (CellType.Wall, CellType.Entrance):
+                
+                cella_occupata = False
+                for altro_robot in agents:
+                    if altro_robot is not self:
+                        if altro_robot.position.x == target_x and altro_robot.position.y == target_y:
+                            cella_occupata = True
+                            break
+                
+                if not cella_occupata:
+                    self.position.x = target_x
+                    self.position.y = target_y
+                    self.energy -= 1
+                else:
+                    pass
 
         if global_map.grid[self.position.x, self.position.y] == CellType.Item and self.carring == False:
             self.carring = True

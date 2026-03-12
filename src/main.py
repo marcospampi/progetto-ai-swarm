@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colors
 from matplotlib.patches import Circle
-from strategy import Strategy
+from strategy import RandomStrategy, ScoutStrategy
 from agent import Agente, Position, VisibilitySensor, CommunicationSensor
 from map import Map
 import parse_json
@@ -50,43 +50,43 @@ def main():
     agents = [
         Agente(
             Position(0, 0), 
-            VisibilitySensor(reach=3, x_rays=False), 
+            VisibilitySensor(reach=10, x_rays=False), 
             CommunicationSensor(radius=4.0),
-            100, 
+            200, 
             Map(rows, cols, value=-1),
-            Strategy(100, 0.8)
+            RandomStrategy(0.8)
         ), 
         Agente(
-            Position(rows - 1, cols - 1), 
+            Position(0, 0), 
             VisibilitySensor(reach=3, x_rays=False), 
             CommunicationSensor(radius=4.0),
             100, 
             Map(rows, cols, value=-1),
-            Strategy(100, 0.8)
+            ScoutStrategy(0.8)
         ), 
         Agente(
-            Position(0, cols - 1), 
+            Position(0, 0), 
             VisibilitySensor(reach=3, x_rays=False), 
             CommunicationSensor(radius=4.0),
             100, 
             Map(rows, cols, value=-1),
-            Strategy(100, 0.8)
+            ScoutStrategy(0.8)
         ), 
         Agente(
-            Position(rows - 1, 0), 
+            Position(0, 0),  
             VisibilitySensor(reach=3, x_rays=False), 
             CommunicationSensor(radius=4.0),
             100, 
             Map(rows, cols, value=-1),
-            Strategy(100, 0.8)
+            ScoutStrategy(0.8)
         ),
         Agente(
-            Position(rows - 1, 0), 
+            Position(0, 0), 
             VisibilitySensor(reach=3, x_rays=False), 
             CommunicationSensor(radius=4.0),
             100, 
             Map(rows, cols, value=-1),
-            Strategy(100, 0.8)
+            ScoutStrategy(0.8)
         )
     ]
 

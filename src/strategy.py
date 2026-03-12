@@ -1,5 +1,6 @@
 import random
 from collections import deque
+from abc import ABC, abstractmethod
 from map import Map, CellType
 from geometry import Position
 from enum import Enum
@@ -10,7 +11,7 @@ class AgentState(Enum):
     REACH_ITEM = 2      # ha visto un item e sta cercando di raggiungerlo
     SEEK_STORAGE = 3    # ho preso l'item e sto andando allo store più vicino
 
-class Strategy:
+class BaseStrategy(ABC):
     def __init__(self, num_goal: int, epsilon: float = 0.8):    #è necessario num_goal? per me no. gli agenti infatti non sanno quanti sono gli item e non gli interessa saperlo. --Antonio
         self.num_goal = num_goal
         self.epsilon = epsilon 
@@ -55,6 +56,10 @@ class Strategy:
                         queue.append(path + [Position(nx, ny)])
 
         return []
+    
+    @abstractmethod
+    def explore_behavior(self, position: Position, local_map: Map) -> tuple[int, int]:
+        pass
 
     def next_move(self, position: Position, local_map: Map, current_energy: int, carring: bool):
         # ________________________________________________________________________________ morto
@@ -123,3 +128,30 @@ class Strategy:
                 return self.next_move(position, local_map, current_energy, carring)
                         
         return None
+    
+
+class RandomStrategy(BaseStrategy):
+
+    def explore_behavior(self, position: Position, local_map: Map) -> tuple[int, int]:
+        return self._get_random_move() if random.random() < self.epsilon else (0, 0)
+
+
+class ScoutStrategy(BaseStrategy):
+    # va dritto finché non sbatte contro un muro, poi cambia direzione
+    def __init__(self, epsilon: float = 0.8):
+        super().__init__(epsilon)
+        self.current_direction = self._get_random_move()
+
+    def explore_behavior(self, position: Position, local_map: Map) -> tuple[int, int]:
+        rows, cols = local_map.grid.shape
+        nx = position.x + self.current_direction[0]
+        ny = position.y + self.current_direction[1]
+
+        if not (0 <= nx < rows and 0 <= ny < cols) or \
+           local_map.grid[nx, ny] == CellType.Wall or \
+           random.random() < 0.05:
+            
+            self.current_direction = self._get_random_move()
+            return (0, 0)
+            
+        return self.current_direction
