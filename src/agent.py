@@ -11,10 +11,10 @@ class Agente:
         self.communication_sensor = communication_sensor
         self.local_map = local_map
         self.strategy = strategy
-        self.carring = False # Angelo
-        self.is_active = False #l'agente parte inattivo, diventa attivo quando la posizione (0, 0) si libera, in questo modo si evita che più agenti partano sovrapposti
+        self.carring = False
+        self.is_active = False #l'agente parte inattivo. diventa attivo quando la posizione (0, 0) si libera, in questo modo si evita che più agenti partano sovrapposti
 
-    def action(self, agents: list['Agente'], global_map: Map):
+    def action(self, agents: list['Agente'], global_map: Map, stats : dict) -> None:
         self.visibility_sensor.update(self.position, self.local_map, global_map)
         self.communication_sensor.update(self, agents)
         move_vector = self.strategy.next_move(self.position, self.local_map, self.energy, self.carring)
@@ -50,6 +50,7 @@ class Agente:
 
         elif global_map.grid[self.position.x, self.position.y] == CellType.Store and self.carring == True:
             self.carring = False
+            stats['oggetti_recuperati'] += 1
 
     def print_map(self) -> None:
         self.local_map.print_map()

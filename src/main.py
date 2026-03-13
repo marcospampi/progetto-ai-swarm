@@ -7,6 +7,9 @@ from strategy import RandomStrategy, ScoutStrategy
 from agent import Agente, Position, VisibilitySensor, CommunicationSensor
 from map import Map
 import parse_json
+import json
+import os
+from datetime import datetime
 
 def main():
     parser = argparse.ArgumentParser()
@@ -106,6 +109,13 @@ def main():
     
     agent_colors = ['orange', 'cyan', 'magenta', 'red']
 
+    totale_oggetti = len(objects_truth)
+    stats = {
+        'oggetti_recuperati': 0,
+        'tick_totali': 0
+    }
+    energie_iniziali = [agente.energy for agente in agents]
+
     # --- CICLO DI SIMULAZIONE ---
     for tick in range(max_ticks):
         ax_global.clear()
@@ -135,7 +145,7 @@ def main():
                 else:
                     continue
 
-            agent.action(agents, global_map)
+            agent.action(agents, global_map, stats)
             
             color = agent_colors[i] if i < len(agent_colors) else 'orange'
             
@@ -171,6 +181,37 @@ def main():
 
     plt.ioff()
     plt.show()
+
+    energie_consumate = [e_iniziale - a.energy for e_iniziale, a in zip(energie_iniziali, agents)]
+    energia_media_consumata = sum(energie_consumate) / len(agents) if agents else 0
+
+    # --- SALVATAGGIO SU JSON ---
+    nome_file_risultati = "risultati_simulazione.json"
+    
+    dati_run = {
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "mappa_utilizzata": args.mappa_json,
+        "numero_agenti": len(agents),
+        "oggetti_recuperati": stats['oggetti_recuperati'],
+        "oggetti_totali": totale_oggetti,
+        "tick_impiegati": stats['tick_totali'],
+        "energia_media_consumata": round(energia_media_consumata, 2)
+    }
+
+    storico_risultati = []
+    if os.path.exists("results/" + nome_file_risultati):
+        try:
+            with open("results/" + nome_file_risultati, "r") as f:
+                storico_risultati = json.load(f)
+        except json.JSONDecodeError:
+            print("Attenzione: Il file JSON esistente era corrotto. Verrà sovrascritto.")
+
+    storico_risultati.append(dati_run)
+
+    with open("results/" + nome_file_risultati, "w") as f:
+        json.dump(storico_risultati, f, indent=4)
+        
+    print(f"\n[INFO] Risultati salvati con successo in 'results/{nome_file_risultati}'")
 
 if __name__ == '__main__':
     main()

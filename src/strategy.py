@@ -43,7 +43,6 @@ class BaseStrategy(ABC):
             path = queue.popleft()
             curr = path[-1]
 
-            # siamo arrivati al target, restituiamo la rotta da seguire escludendo la posizione di partenza
             if curr.x == target.x and curr.y == target.y:
                 return path[1:]
 
