@@ -51,9 +51,19 @@ class BaseStrategy(ABC):
                 nx, ny = curr.x + dx, curr.y + dy
                 
                 if 0 <= nx < rows and 0 <= ny < cols and (nx, ny) not in visited:
-                    if local_map.grid[nx, ny] != CellType.Wall:
-                        visited.add((nx, ny))
-                        queue.append(path + [Position(nx, ny)])
+                    cell_type = local_map.grid[nx, ny]
+                    
+                    if cell_type == CellType.Wall:
+                        continue
+                        
+                    if self.status == AgentState.SEEK_STORAGE and cell_type == CellType.Exit:
+                        continue
+                        
+                    if self.status != AgentState.SEEK_STORAGE and cell_type == CellType.Entrance:
+                        continue
+
+                    visited.add((nx, ny))
+                    queue.append(path + [Position(nx, ny)])
 
         return []
     
@@ -73,8 +83,7 @@ class BaseStrategy(ABC):
                 self.status = AgentState.REACH_ITEM
                 return self.next_move(position, local_map, current_energy, carring)
             
-            # Se non ha trovato un item da raggiungere, esplora casualmente
-            return self._get_random_move() if random.random() < self.epsilon else (0, 0) #dobbiamo fare la logica direzionale
+            return self.explore_behavior(position, local_map)
 
         
         # ________________________________________________________________________________ raggiungi l'obbiettivo più vicino

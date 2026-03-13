@@ -27,7 +27,7 @@ class Agente:
 
         if 0 <= target_x < global_map.grid.shape[0] and 0 <= target_y < global_map.grid.shape[1]:
             #logica di non sovrapposizione tra agenti
-            if global_map.grid[target_x, target_y] not in (CellType.Wall, CellType.Entrance):
+            if global_map.grid[target_x, target_y] != CellType.Wall:
                 
                 cella_occupata = False
                 for altro_robot in agents:
@@ -47,6 +47,9 @@ class Agente:
             self.carring = True
             global_map.grid[self.position.x, self.position.y] = CellType.Empty
             self.local_map.grid[self.position.x, self.position.y] = CellType.Empty
+
+        elif global_map.grid[self.position.x, self.position.y] == CellType.Store and self.carring == True:
+            self.carring = False
 
     def print_map(self) -> None:
         self.local_map.print_map()
