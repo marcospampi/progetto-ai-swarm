@@ -4,12 +4,14 @@ from abc import ABC, abstractmethod
 from map import Map, CellType
 from geometry import Position
 from enum import Enum
+import math
 
 class AgentState(Enum):
     DEAD = 0
     EXPLORE = 1
     REACH_ITEM = 2      # ha visto un item e sta cercando di raggiungerlo
     SEEK_STORAGE = 3    # ho preso l'item e sto andando allo store più vicino
+    LOW_ENERGY = 4      # Energia < 20%, cerca il punto di relay
 
 class BaseStrategy(ABC):
     def __init__(self, num_goal: int, epsilon: float = 0.8):    #è necessario num_goal? per me no. gli agenti infatti non sanno quanti sono gli item e non gli interessa saperlo. --Antonio
@@ -66,14 +68,90 @@ class BaseStrategy(ABC):
 
         return []
     
+    #metodo che permette di trovare un punto di relay ottimale per la comunicazione quando l'agente si scarica. Cerca un punto libero spazioso e centrale rispetto alla propria mappa locale
+    def _find_optimal_relay_spot(self, current_pos: Position, local_map: Map) -> Position:
+        rows, cols = local_map.grid.shape
+        empty_cells = []
+    
+        for r in range(rows):
+            for c in range(cols):
+                if local_map.grid[r, c] == CellType.Empty:
+                    empty_cells.append((r, c))
+                    
+        if not empty_cells:
+            return None
+            
+        # calcolo del centroide
+        sum_r = sum(r for r, c in empty_cells)
+        sum_c = sum(c for r, c in empty_cells)
+        center_r = sum_r / len(empty_cells)
+        center_c = sum_c / len(empty_cells)
+        
+        candidates = []
+        
+        # valutiamo lo spazio e la centralità di ogni cella
+        for r, c in empty_cells:
+            free_around = 0
+            
+            for dr in [-1, 0, 1]:
+                for dc in [-1, 0, 1]:
+                    if dr == 0 and dc == 0: continue
+                    nr, nc = r + dr, c + dc
+                    if 0 <= nr < rows and 0 <= nc < cols:
+                        if local_map.grid[nr, nc] in [CellType.Empty, CellType.Entrance, CellType.Exit]:
+                            free_around += 1
+                            
+            dist_to_center = math.sqrt((r - center_r)**2 + (c - center_c)**2)
+            
+            candidates.append({
+                'pos': Position(r, c),
+                'free_around': free_around,
+                'dist_to_center': dist_to_center
+            })
+        
+        max_free_available = max(c['free_around'] for c in candidates)
+        acceptable_free_space = max(5, max_free_available)
+        
+        spacious_spots = [c for c in candidates if c['free_around'] >= acceptable_free_space]
+        
+        if not spacious_spots:
+            spacious_spots = candidates
+            
+        # tra i posti larghi, scegliamo quello più vicino al centroide
+        spacious_spots.sort(key=lambda x: x['dist_to_center'])
+        
+        return spacious_spots[0]['pos']
+    
     @abstractmethod
     def explore_behavior(self, position: Position, local_map: Map) -> tuple[int, int]:
         pass
 
     def next_move(self, position: Position, local_map: Map, current_energy: int, carring: bool):
         # ________________________________________________________________________________ morto
-        if current_energy <= 0: self.status = AgentState.DEAD
-        if self.status == AgentState.DEAD: return None
+        if current_energy <= 0: 
+            self.status = AgentState.DEAD
+            return None
+        
+        # ________________________________________________________________________________ low energy
+        SOGLIA_CRITICA = 20
+        if current_energy <= SOGLIA_CRITICA and not carring and self.status != AgentState.LOW_ENERGY:
+            self.status = AgentState.LOW_ENERGY
+            
+            # Cerca il punto centrale largo
+            target_ottimale = self._find_optimal_relay_spot(position, local_map)
+            
+            if target_ottimale:
+                self.Path_target = self._get_Path(position, local_map, target_ottimale)
+            else:
+                self.Path_target = []
+
+
+        if self.status == AgentState.LOW_ENERGY:
+            if self.Path_target:
+                next_move_ = self.Path_target.pop(0)
+                return (next_move_.x - position.x, next_move_.y - position.y)
+            else:
+                return (0, 0)
 
         # ________________________________________________________________________________ esplora
         if self.status == AgentState.EXPLORE:

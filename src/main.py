@@ -105,7 +105,7 @@ def main():
     
     plt.ion()
 
-    max_ticks = 100
+    max_ticks = 150
     agent_colors = ['orange', 'cyan', 'magenta', 'red', 'orange']
 
     totale_oggetti = len(objects_truth)
