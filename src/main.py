@@ -122,7 +122,19 @@ def main():
 
         legend_handles = []
 
+        cella_iniziale_occupata = any(
+            a.is_active and a.position.x == 0 and a.position.y == 0 
+            for a in agents
+        )
+
         for i, agent in enumerate(agents):
+            if not agent.is_active:
+                if not cella_iniziale_occupata:
+                    agent.is_active = True
+                    cella_iniziale_occupata = True
+                else:
+                    continue
+
             agent.action(agents, global_map)
             
             color = agent_colors[i] if i < len(agent_colors) else 'orange'

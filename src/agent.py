@@ -12,7 +12,7 @@ class Agente:
         self.local_map = local_map
         self.strategy = strategy
         self.carring = False # Angelo
-
+        self.is_active = False #l'agente parte inattivo, diventa attivo quando la posizione (0, 0) si libera, in questo modo si evita che più agenti partano sovrapposti
 
     def action(self, agents: list['Agente'], global_map: Map):
         self.visibility_sensor.update(self.position, self.local_map, global_map)
