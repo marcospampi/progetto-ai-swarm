@@ -16,5 +16,59 @@
         "oggetti_totali": 10,
         "tick_impiegati": 0,
         "energia_media_consumata": 80.0
+    },
+    {
+        "timestamp": "2026-03-13 11:11:28",
+        "mappa_utilizzata": "json/A.json",
+        "numero_agenti": 5,
+        "oggetti_recuperati": 8,
+        "oggetti_totali": 10,
+        "tick_impiegati": 0,
+        "energia_media_consumata": 83.2
+    },
+    {
+        "timestamp": "2026-03-13 11:17:10",
+        "mappa_utilizzata": "maps/A.json",
+        "numero_agenti": 5,
+        "oggetti_recuperati": 8,
+        "oggetti_totali": 10,
+        "tick_impiegati": 0,
+        "energia_media_consumata": 80.0
+    },
+    {
+        "timestamp": "2026-03-13 11:53:50",
+        "mappa_utilizzata": "maps/A.json",
+        "numero_agenti": 5,
+        "oggetti_recuperati": 9,
+        "oggetti_totali": 10,
+        "tick_impiegati": 0,
+        "energia_media_consumata": 78.6
+    },
+    {
+        "timestamp": "2026-03-13 16:38:27",
+        "mappa_utilizzata": "maps/A.json",
+        "numero_agenti": 5,
+        "oggetti_recuperati": 4,
+        "oggetti_totali": 10,
+        "tick_impiegati": 0,
+        "energia_media_consumata": 82.2
+    },
+    {
+        "timestamp": "2026-03-13 16:39:13",
+        "mappa_utilizzata": "maps/A.json",
+        "numero_agenti": 5,
+        "oggetti_recuperati": 6,
+        "oggetti_totali": 10,
+        "tick_impiegati": 0,
+        "energia_media_consumata": 78.6
+    },
+    {
+        "timestamp": "2026-03-13 16:40:53",
+        "mappa_utilizzata": "maps/A.json",
+        "numero_agenti": 5,
+        "oggetti_recuperati": 9,
+        "oggetti_totali": 10,
+        "tick_impiegati": 0,
+        "energia_media_consumata": 80.6
     }
 ]

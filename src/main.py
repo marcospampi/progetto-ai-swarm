@@ -95,19 +95,18 @@ def main():
 
     # --- CONFIGURAZIONE LAYOUT GRAFICO ---
     num_agents = len(agents)
-    fig = plt.figure(figsize=(16, 8))
+    fig = plt.figure(figsize=(18, 8))
     
-    gs = fig.add_gridspec(num_agents, 4) 
+    gs = fig.add_gridspec(num_agents, 5, width_ratios=[1, 1, 1, 1.2, 0.3]) 
     
     ax_global = fig.add_subplot(gs[:, :3])
-    
     axs_local = [fig.add_subplot(gs[i, 3]) for i in range(num_agents)]
+    axs_energy = [fig.add_subplot(gs[i, 4]) for i in range(num_agents)]
     
     plt.ion()
 
     max_ticks = 100
-    
-    agent_colors = ['orange', 'cyan', 'magenta', 'red']
+    agent_colors = ['orange', 'cyan', 'magenta', 'red', 'orange']
 
     totale_oggetti = len(objects_truth)
     stats = {
@@ -143,6 +142,10 @@ def main():
                     agent.is_active = True
                     cella_iniziale_occupata = True
                 else:
+                    axs_local[i].clear()
+                    axs_local[i].axis('off')
+                    axs_energy[i].clear()
+                    axs_energy[i].axis('off')
                     continue
 
             agent.action(agents, global_map, stats)
@@ -171,6 +174,23 @@ def main():
                     axs_local[i].plot(c, r, "o", color='#FFD700', markersize=4)
 
             axs_local[i].axis('off')
+            axs_energy[i].clear()
+            
+            energia_mostrata = max(0, agent.energy) 
+            
+            axs_energy[i].bar([''], [energia_mostrata], width=0.5)
+            axs_energy[i].set_ylim(0, energie_iniziali[i])
+            axs_energy[i].set_xticks([])
+            axs_energy[i].set_yticks([])
+            for spine in axs_energy[i].spines.values():
+                spine.set_visible(False)
+                
+            offset_y = energie_iniziali[i] * 0.05
+            axs_energy[i].text(0, energia_mostrata + offset_y, f"{energia_mostrata}", 
+                               ha='center', va='bottom', fontsize=10, fontweight='bold')
+            
+            if i == 0:
+                axs_energy[i].set_title("Energia", fontsize=9)
 
         ax_global.legend(handles=legend_handles, loc="upper right")
 

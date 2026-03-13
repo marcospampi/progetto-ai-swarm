@@ -14,5 +14,5 @@ def load_environment(filepath: str) -> tuple:
     return grid, warehouses, objects_truth
 
 def is_walkable(grid, r, c):
-    return grid[r][c] in (EMPTY, ENTRANCE, EXIT) # Assicurarsi che ad esempio l'entrata e l'uscita siano percorribili solo in un senso (in base da dove viene l'agente)
+    return grid[r][c] in (EMPTY, ENTRANCE, EXIT)
 
