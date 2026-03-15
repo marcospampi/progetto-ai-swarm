@@ -11,13 +11,23 @@ class AgentState(Enum):
     SEEK_STORAGE = 3    # calcola la BFS per il magazzino più vicino
     REACH_STORAGE = 4   # ragionge il magazzino e deposita l'item
 
-class Strategy:
+
+class AbstractStrategy:
+    num_goal: int
+    epsilon: float
+    status: AgentState
+    storages: list
+    Path_target: any
     def __init__(self, num_goal: int, epsilon: float = 0.8):
         self.num_goal = num_goal
         self.epsilon = epsilon 
         self.status = AgentState.EXPLORE
         self.storages = []
+        self.Path_target = None
+    def next_move(self, position: Position, local_map: Map, current_energy: int) -> tuple[int,int]:
+        return (0,0)
 
+class Strategy(AbstractStrategy):
     def _get_random_move(self) -> tuple[int, int]: 
         return random.choice([(-1, 0), (1, 0), (0, -1), (0, 1)])
 
@@ -55,7 +65,7 @@ class Strategy:
                         queue.append(path + [Position(nx, ny)])
         return None, []
 
-    def next_move(self, position: Position, local_map: Map, current_energy: int):
+    def next_move(self, position: Position, local_map: Map, current_energy: int) -> tuple[int,int]:
         if current_energy <= 0: self.status = AgentState.DEAD
         if self.status == AgentState.DEAD: return None
 
@@ -105,4 +115,8 @@ class Strategy:
             next_move_ = self.Path_target.pop(0)
             return (next_move_.x - position.x, next_move_.y - position.y)
 
+        return None
+    
+class StupidStrategy(AbstractStrategy):
+    def next_move(self, position, local_map, current_energy):
         return None

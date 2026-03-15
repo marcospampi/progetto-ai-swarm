@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colors
 from matplotlib.patches import Circle
-from strategy import Strategy
+from strategy import Strategy, StupidStrategy
 from agent import Agente, Position, VisibilitySensor, CommunicationSensor
 from map import Map
 import parse_json
@@ -47,41 +47,42 @@ def main():
         global_map.grid[r, c] = 5
 
     # --- INIZIALIZZAZIONE AGENTI ---
+    start = Position(0,0)
     agents = [
         Agente(
-            Position(0, 0), 
+            start, #Position(0, 0), 
             VisibilitySensor(reach=3, x_rays=False), 
             CommunicationSensor(radius=4.0),
             100, 
             Map(rows, cols, value=-1),
-            Strategy(100, 0.8)
+            StupidStrategy(100, 0.8)
         ), 
         Agente(
-            Position(rows - 1, cols - 1), 
+            start, #Position(rows - 1, cols - 1), 
             VisibilitySensor(reach=3, x_rays=False), 
             CommunicationSensor(radius=4.0),
             100, 
             Map(rows, cols, value=-1),
-            Strategy(100, 0.8)
+            StupidStrategy(100, 0.8)
         ), 
         Agente(
-            Position(0, cols - 1), 
+            start, #Position(0, cols - 1), 
             VisibilitySensor(reach=3, x_rays=False), 
             CommunicationSensor(radius=4.0),
             100, 
             Map(rows, cols, value=-1),
-            Strategy(100, 0.8)
+            StupidStrategy(100, 0.8)
         ), 
         Agente(
-            Position(rows - 1, 0), 
+            start, #Position(rows - 1, 0), 
             VisibilitySensor(reach=3, x_rays=False), 
             CommunicationSensor(radius=4.0),
             100, 
             Map(rows, cols, value=-1),
-            Strategy(100, 0.8)
+            StupidStrategy(100, 0.8)
         ),
         Agente(
-            Position(rows - 1, 0), 
+            start, #Position(rows - 1, 0), 
             VisibilitySensor(reach=3, x_rays=False), 
             CommunicationSensor(radius=4.0),
             100, 
@@ -106,12 +107,15 @@ def main():
     
     agent_colors = ['orange', 'cyan', 'magenta', 'red']
 
+    # terminates the run whenever the window is closed
+    fig.canvas.mpl_connect('close_event', lambda _: quit())
+
     # --- CICLO DI SIMULAZIONE ---
     for tick in range(max_ticks):
         ax_global.clear()
         
         ax_global.imshow(global_map.grid, cmap=global_cmap, norm=global_norm, origin='upper') 
-        ax_global.set_title(f"Mappa Globale - Tick {tick}")
+        ax_global.set_title(f"Mappa Globale - Tick {tick + 1}")
         
         for obj in objects_truth:
             r = obj.get('x', 0) if isinstance(obj, dict) else obj[0]

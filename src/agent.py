@@ -1,10 +1,16 @@
 from geometry import Position, VisibilitySensor, CommunicationSensor
 from map import Map, CellType
-from strategy import Strategy
+from strategy import AbstractStrategy, Strategy
 
 
 class Agente:
-    def __init__(self, position: Position, visibility_sensor: VisibilitySensor,  communication_sensor: CommunicationSensor, energy: int, local_map: Map, strategy: Strategy):
+    position: Position
+    visibility_sensor: VisibilitySensor
+    energy: int
+    communication_sensor: CommunicationSensor
+    local_map: Map
+    strategy: AbstractStrategy
+    def __init__(self, position: Position, visibility_sensor: VisibilitySensor,  communication_sensor: CommunicationSensor, energy: int, local_map: Map, strategy: AbstractStrategy):
         self.position = position
         self.visibility_sensor = visibility_sensor
         self.energy = energy
@@ -16,7 +22,7 @@ class Agente:
         self.visibility_sensor.update(self.position, self.local_map, global_map)
         self.communication_sensor.update(self, agents)
         move_vector = self.strategy.next_move(self.position, self.local_map, self.energy)
-
+        print(self.strategy)
         if move_vector is None: return
 
         dx, dy = move_vector 
@@ -30,4 +36,4 @@ class Agente:
                 self.energy -= 1
 
     def print_map(self) -> None:
-        self.local_map.print_map()
+        self.local_map.print_map()(0,0)
