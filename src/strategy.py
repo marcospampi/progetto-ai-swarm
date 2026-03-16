@@ -13,14 +13,19 @@ class AgentState(Enum):
     SEEK_STORAGE = 3    # ho preso l'item e sto andando allo store più vicino
     LOW_ENERGY = 4      # Energia < 20%, cerca il punto di relay
 
+
 class BaseStrategy(ABC):
+    num_goal: int
+    epsilon: float
+    status: AgentState
+    storages: list
+    Path_target: any
     def __init__(self, num_goal: int, epsilon: float = 0.8):    #è necessario num_goal? per me no. gli agenti infatti non sanno quanti sono gli item e non gli interessa saperlo. --Antonio
         self.num_goal = num_goal
         self.epsilon = epsilon 
         self.status = AgentState.EXPLORE
         self.storages = []
-        self.Path_target = []
-
+        self.Path_target = None
     def _get_random_move(self) -> tuple[int, int]: 
         return random.choice([(-1, 0), (1, 0), (0, -1), (0, 1)])
 

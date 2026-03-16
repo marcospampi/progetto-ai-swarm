@@ -50,6 +50,7 @@ def main():
         global_map.grid[r, c] = 5
 
     # --- INIZIALIZZAZIONE AGENTI ---
+    start = Position(0,0)
     agents = [
         Agente(
             Position(0, 0), 
@@ -115,12 +116,15 @@ def main():
     }
     energie_iniziali = [agente.energy for agente in agents]
 
+    # terminates the run whenever the window is closed
+    fig.canvas.mpl_connect('close_event', lambda _: quit())
+
     # --- CICLO DI SIMULAZIONE ---
     for tick in range(max_ticks):
         ax_global.clear()
         
         ax_global.imshow(global_map.grid, cmap=global_cmap, norm=global_norm, origin='upper') 
-        ax_global.set_title(f"Mappa Globale - Tick {tick}")
+        ax_global.set_title(f"Mappa Globale - Tick {tick + 1}")
         
         for obj in objects_truth:
             r = obj.get('x', 0) if isinstance(obj, dict) else obj[0]

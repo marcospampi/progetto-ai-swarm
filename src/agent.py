@@ -3,7 +3,15 @@ from map import Map, CellType
 from strategy import BaseStrategy
 
 
+
+
 class Agente:
+    position: Position
+    visibility_sensor: VisibilitySensor
+    energy: int
+    communication_sensor: CommunicationSensor
+    local_map: Map
+    strategy: BaseStrategy
     def __init__(self, position: Position, visibility_sensor: VisibilitySensor,  communication_sensor: CommunicationSensor, energy: int, local_map: Map, strategy: BaseStrategy):
         self.position = position
         self.visibility_sensor = visibility_sensor
@@ -53,4 +61,4 @@ class Agente:
             stats['oggetti_recuperati'] += 1
 
     def print_map(self) -> None:
-        self.local_map.print_map()
+        self.local_map.print_map()(0,0)
