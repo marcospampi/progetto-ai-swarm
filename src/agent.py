@@ -8,6 +8,7 @@ from strategy import BaseStrategy
 class Agente:
     position: Position
     visibility_sensor: VisibilitySensor
+    initial_energy: int
     energy: int
     communication_sensor: CommunicationSensor
     local_map: Map
@@ -15,17 +16,17 @@ class Agente:
     def __init__(self, position: Position, visibility_sensor: VisibilitySensor,  communication_sensor: CommunicationSensor, energy: int, local_map: Map, strategy: BaseStrategy):
         self.position = position
         self.visibility_sensor = visibility_sensor
-        self.energy = energy
+        self.energy = self.initial_energy = energy
         self.communication_sensor = communication_sensor
         self.local_map = local_map
         self.strategy = strategy
-        self.carring = False
+        self.carrying = False
         self.is_active = False #l'agente parte inattivo. diventa attivo quando la posizione (0, 0) si libera, in questo modo si evita che più agenti partano sovrapposti
 
     def action(self, agents: list['Agente'], global_map: Map, stats : dict) -> None:
         self.visibility_sensor.update(self.position, self.local_map, global_map)
         self.communication_sensor.update(self, agents)
-        move_vector = self.strategy.next_move(self.position, self.local_map, self.energy, self.carring)
+        move_vector = self.strategy.next_move(self.position, self.local_map, self.energy, self.carrying)
 
         if move_vector is None: return
 
@@ -51,13 +52,13 @@ class Agente:
                 else:
                     pass
 
-        if global_map.grid[self.position.x, self.position.y] == CellType.Item and self.carring == False:
-            self.carring = True
+        if global_map.grid[self.position.x, self.position.y] == CellType.Item and self.carrying == False:
+            self.carrying = True
             global_map.grid[self.position.x, self.position.y] = CellType.Empty
             self.local_map.grid[self.position.x, self.position.y] = CellType.Empty
 
-        elif global_map.grid[self.position.x, self.position.y] == CellType.Store and self.carring == True:
-            self.carring = False
+        elif global_map.grid[self.position.x, self.position.y] == CellType.Store and self.carrying == True:
+            self.carrying = False
             stats['oggetti_recuperati'] += 1
 
     def print_map(self) -> None:
