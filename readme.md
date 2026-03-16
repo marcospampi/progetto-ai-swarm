@@ -22,5 +22,5 @@ python3 -m pip install -r requirements.txt
 
 Quindi, eseguiamo uno scenario nel simulatore realizzato:
 ```sh
-python3 src/main.py maps/A.json
+python3 src/main.py maps/A.json -i num_iteration -t num_ticks -v (for verbose json)
 ```

@@ -160,5 +160,22 @@
         "oggetti_totali": 10,
         "tick_impiegati": 0,
         "energia_media_consumata": 90.67
+    },
+    {
+        "timestamp": "2026-03-16T21:39:52.887753",
+        "mappa_utilizzata": "maps/A.json",
+        "numero_agenti": 6,
+        "oggetti_recuperati": 4,
+        "oggetti_totali": 10,
+        "tick_impiegati": 0,
+        "energia_media_consumata": 90.5
+    },
+    {
+        "timestamp": "22:10:03",
+        "mappa": "A.json",
+        "agenti": 5,
+        "oggetti": "4/10",
+        "ticks": 500,
+        "energia_media": 100.6
     }
 ]
