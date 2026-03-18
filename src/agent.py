@@ -13,6 +13,7 @@ class Agente:
     communication_sensor: CommunicationSensor
     local_map: Map
     strategy: BaseStrategy
+
     def __init__(self, position: Position, visibility_sensor: VisibilitySensor,  communication_sensor: CommunicationSensor, energy: int, local_map: Map, strategy: BaseStrategy):
         self.position = position
         self.visibility_sensor = visibility_sensor
@@ -49,8 +50,15 @@ class Agente:
                     self.position.x = target_x
                     self.position.y = target_y
                     self.energy -= 1
+                    self.strategy.tabu_list.append(move_vector)
+
                 else:
-                    pass
+                    move_alt = self.strategy.collision_event(self.position, self.local_map, agents)
+                    if move_alt != (0, 0):
+                        self.position.x += move_alt[0]
+                        self.position.y += move_alt[1]
+                        self.energy -= 1
+                        self.strategy.tabu_list.append(move_alt)
 
         if global_map.grid[self.position.x, self.position.y] == CellType.Item and self.carrying == False:
             self.carrying = True
