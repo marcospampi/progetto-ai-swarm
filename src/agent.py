@@ -50,7 +50,6 @@ class Agente:
                     self.position.x = target_x
                     self.position.y = target_y
                     self.energy -= 1
-                    self.strategy.tabu_list.append(move_vector)
 
                 else:
                     move_alt = self.strategy.collision_event(self.position, self.local_map, agents)
@@ -58,7 +57,6 @@ class Agente:
                         self.position.x += move_alt[0]
                         self.position.y += move_alt[1]
                         self.energy -= 1
-                        self.strategy.tabu_list.append(move_alt)
 
         if global_map.grid[self.position.x, self.position.y] == CellType.Item and self.carrying == False:
             self.carrying = True
@@ -70,4 +68,4 @@ class Agente:
             stats['oggetti_recuperati'] += 1
 
     def print_map(self) -> None:
-        self.local_map.print_map()(0,0)
+        self.local_map.print_map()
