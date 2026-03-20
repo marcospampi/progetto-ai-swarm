@@ -27,6 +27,13 @@ class Agente:
     def action(self, agents: list['Agente'], global_map: Map, stats : dict) -> None:
         self.visibility_sensor.update(self.position, self.local_map, global_map)
         self.communication_sensor.update(self, agents)
+
+        if hasattr(self.strategy, 'teammates'):
+            self.strategy.teammates = [
+                altro.position for altro in agents 
+                if altro is not self and altro.is_active and altro.strategy.status.value != 0
+            ]
+
         move_vector = self.strategy.next_move(self.position, self.local_map, self.energy, self.carrying)
 
         if move_vector is None: return

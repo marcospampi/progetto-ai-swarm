@@ -241,21 +241,21 @@ class BaseStrategy(ABC):
 
 
 class RandomStrategy(BaseStrategy):
-
+    # strategia di base, si muove casualmente senza considerare la mappa o lo stato
     def _explore_behavior(self, position: Position, local_map: Map) -> tuple[int, int]:
         moves = self._get_filtered_moves(position, local_map)
         if moves:
             return random.choice(moves) if moves else (0, 0)
         return self._get_random_move()
-
-# Strategia Utile (potrebbe essere la base per le strategie più sofisticate)
+        
 class ScoutStrategy(BaseStrategy):
-    # dritto contro un muro poi cambia direzione
+    # esplorazione greedy, cerca di andare sempre in una direzione finché non incontra un ostacolo o una posizione tabu, poi cambia direzione casualmente
     def __init__(self, epsilon: float = 0.8):
         super().__init__(epsilon)
         self.current_direction = self._get_random_move()
 
     def _explore_behavior(self, position: Position, local_map: Map) -> tuple[int, int]:
+        # con probabilità epsilon, ignora la direzione attuale e sceglie una mossa casuale filtrata (preferendo quelle non tabu)
         if random.random() < self.epsilon:
             moves = self._get_filtered_moves(position, local_map)
             return random.choice(moves) if moves else (0,0)
@@ -274,13 +274,8 @@ class ScoutStrategy(BaseStrategy):
             
         return self.current_direction
 
-# Strategia Utile (potrebbe essere la base per le strategie più sofisticate)
 class ScoutStrategy2(BaseStrategy):
-    # esplorazione greedy, sempre verso l'ignoto
-    def __init__(self, epsilon: float = 0.8):
-        super().__init__(epsilon)
-        self.current_direction = self._get_random_move()
-
+    # simile a ScoutStrategy ma con una logica più intelligente per cambiare direzione: cerca di dirigersi verso le celle sconosciute più vicine, evitando quelle tabu e tenendo conto della presenza di altri agenti (se forniti)
     def _explore_behavior(self, position: Position, local_map: Map) -> tuple[int, int]:        
         if random.random() < self.epsilon:
             moves = self._get_filtered_moves(position, local_map)
@@ -297,13 +292,9 @@ class ScoutStrategy2(BaseStrategy):
                 
         moves = self._get_filtered_moves(position, local_map)
         return random.choice(moves) if moves else (0, 0)
-                
-        return (0, 0)
     
-
-# STRATEGIA BOCCIATA (facile bloccarsi in cicli ridondanti)
 class WallFollowerStrategy(BaseStrategy):
-# strategia da labirinto in cui si segue il muro, utile per struttura a corridoio
+# strategia da labirinto in cui si segue il muro, utile per struttura a corridoio. Bocciata perché è facile bloccarsi in cicli ridondanti
     def __init__(self, epsilon: float = 0.0):
         super().__init__(epsilon)
         self.dir = (0, 1)
@@ -325,10 +316,10 @@ class WallFollowerStrategy(BaseStrategy):
             
         self.dir = (-self.dir[1], self.dir[0])
         return self.dir
-
-# STRATEGIA UTILE (ma in corridoi può portare stalli, meglio destinarla a singoli agenti esploratori)
+    
 class SparceStrategy(BaseStrategy):
-    # evitiamo sovrapposizioni massimizzando l'esplorazione totale
+    # strategia che cerca di mantenere una certa distanza dagli altri agenti, preferendo muoversi verso aree meno esplorate e meno frequentate dai compagni, per massimizzare la copertura della mappa e ridurre le sovrapposizioni nei percorsi di esplorazione.
+    # utile, ma in corridoi può portare stalli, meglio destinarla a singoli agenti esploratori
     def __init__(self, epsilon: float = 0.2):
         super().__init__(epsilon)
         self.teammates = []
@@ -351,10 +342,9 @@ class SparceStrategy(BaseStrategy):
         best_move = max(moves, key=lambda m: m[0]*vx + m[1]*vy)
         return best_move
 
-# Serve che gli agenti interagiscano in modo dinamico e efficace per spartirsi dinamicamente lo spazio di ricerca
-
-# UNIONE DI SPARCE E SCOUT2 (Sembra molto efficace per le operaie)
 class SwarmExplorerStrategy(BaseStrategy):
+    # Serve che gli agenti interagiscano in modo dinamico e efficace per spartirsi dinamicamente lo spazio di ricerca.
+    # UNIONE DI SPARCE E SCOUT2 (Sembra molto efficace per le operaie)
     def __init__(self, epsilon: float = 0.1):
         super().__init__(epsilon)
         self.teammates = []
