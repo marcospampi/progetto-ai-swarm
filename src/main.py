@@ -47,12 +47,20 @@ def main():
             global_map.grid[r, c] = 5
 
         # Reset Agenti (Nuove istanze per ogni iterazione)
+        """
         agents = [
-            Agente(Position(0, 0), VisibilitySensor(reach=5), CommunicationSensor(radius=5.0), 100, Map(rows, cols, value=-1), ScoutStrategy2(totale_oggetti, storages, 0.05)), 
-            Agente(Position(0, 0), VisibilitySensor(reach=3), CommunicationSensor(radius=3.0), 150, Map(rows, cols, value=-1), SwarmExplorerStrategy(totale_oggetti, storages, 0.3)), 
-            Agente(Position(0, 0), VisibilitySensor(reach=3), CommunicationSensor(radius=3.0), 150, Map(rows, cols, value=-1), SwarmExplorerStrategy(totale_oggetti, storages, 0.3)), 
-            Agente(Position(0, 0), VisibilitySensor(reach=3), CommunicationSensor(radius=3.0), 150, Map(rows, cols, value=-1), SwarmExplorerStrategy(totale_oggetti, storages, 0.3)),
-            Agente(Position(0, 0), VisibilitySensor(reach=4), CommunicationSensor(radius=3.0), 150, Map(rows, cols, value=-1), WallFollowerStrategy(totale_oggetti, storages, 0.4))
+            Agente(Position(0, 0), VisibilitySensor(reach=4), CommunicationSensor(radius=5.0), 100, Map(rows, cols, value=-1), ScoutStrategy2(totale_oggetti, storages, 0.05)), 
+            Agente(Position(0, 0), VisibilitySensor(reach=2), CommunicationSensor(radius=2.0), 150, Map(rows, cols, value=-1), SwarmExplorerStrategy(totale_oggetti, storages, 0.3)), 
+            Agente(Position(0, 0), VisibilitySensor(reach=2), CommunicationSensor(radius=2.0), 150, Map(rows, cols, value=-1), SwarmExplorerStrategy(totale_oggetti, storages, 0.3)), 
+            Agente(Position(0, 0), VisibilitySensor(reach=2), CommunicationSensor(radius=2.0), 150, Map(rows, cols, value=-1), SwarmExplorerStrategy(totale_oggetti, storages, 0.3)),
+            Agente(Position(0, 0), VisibilitySensor(reach=4), CommunicationSensor(radius=3.0), 125, Map(rows, cols, value=-1), WallFollowerStrategy(totale_oggetti, storages, 0.4))
+        ]
+        """
+        agents = [ 
+            Agente(Position(0, 0), VisibilitySensor(reach=2), CommunicationSensor(radius=2.0), 175, Map(rows, cols, value=-1), SwarmExplorerStrategy(totale_oggetti, storages, 0.3)), 
+            Agente(Position(0, 0), VisibilitySensor(reach=2), CommunicationSensor(radius=2.0), 175, Map(rows, cols, value=-1), SwarmExplorerStrategy(totale_oggetti, storages, 0.3)), 
+            Agente(Position(0, 0), VisibilitySensor(reach=2), CommunicationSensor(radius=2.0), 175, Map(rows, cols, value=-1), SwarmExplorerStrategy(totale_oggetti, storages, 0.3)), 
+            Agente(Position(0, 0), VisibilitySensor(reach=2), CommunicationSensor(radius=2.0), 175, Map(rows, cols, value=-1), SwarmExplorerStrategy(totale_oggetti, storages, 0.3)), 
         ]
 
         # Setup Grafica se richiesta
