@@ -1,5 +1,5 @@
-# Progetto AI / Swarm
-Progetto di Artificial Intelligence/AI Swarm prodotto dal gruppo Antonio Rosano, Angelo Spadola, Marco Spampinato per l'anno accademico 2025/2026
+# Progetto Artificial and Swarm Intelligence
+Progetto di Artificial and Swarm Intelligence prodotto dal gruppo formato da Antonio Rosano, Angelo Spadola e Marco Spampinato per l'anno accademico 2025/2026.
 
 ## Get started!
 Per iniziare, inizializziamo un ambiente locale Python:
