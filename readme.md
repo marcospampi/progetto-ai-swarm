@@ -24,3 +24,22 @@ Quindi, eseguiamo uno scenario nel simulatore realizzato:
 ```sh
 python3 src/main.py maps/A.json -i num_iteration -t num_ticks -v (for verbose json)
 ```
+
+## Help!
+```sh
+usage: main.py [-h] [-g] [-v] [-i ITERATIONS] [-t MAX_TICKS] mappa_json
+
+Swarm Intelligence Simulator
+
+positional arguments:
+  mappa_json            Percorso del file JSON della mappa
+
+options:
+  -h, --help            show this help message and exit
+  -g, --graphics        Attiva la visualizzazione grafica
+  -v, --verbose         Salva lo storico dettagliato in JSON
+  -i, --iterations ITERATIONS
+                        Numero di simulazioni da eseguire
+  -t, --max_ticks MAX_TICKS
+                        Limite massimo di tick per run
+```

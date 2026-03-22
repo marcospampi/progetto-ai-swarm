@@ -1,4 +1,5 @@
-from geometry import Position, VisibilitySensor, CommunicationSensor
+from geometry import Position
+from sensors import VisibilitySensor, CommunicationSensor
 from map import Map, CellType
 from strategy import BaseStrategy
 
