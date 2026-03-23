@@ -61,5 +61,8 @@ class CommunicationSensor:
                 my_grid = self_agent.local_map.grid
                 other_grid = other_agent.local_map.grid
                 
-                mask = (my_grid == CellType.unknown) & (other_grid != CellType.unknown)
-                my_grid[mask] = other_grid[mask]
+                mask_unknown = (my_grid == CellType.unknown) & (other_grid != CellType.unknown)
+                my_grid[mask_unknown] = other_grid[mask_unknown]
+
+                mask_ghosts = (my_grid == CellType.Item) & (other_grid == CellType.Empty)
+                my_grid[mask_ghosts] = CellType.Empty

@@ -3,10 +3,10 @@ from collections import deque
 from abc import ABC, abstractmethod
 from map import Map, CellType
 from geometry import Position
-from enum import Enum
+from enum import IntEnum
 import math
 
-class AgentState(Enum):
+class AgentState(IntEnum):
     DEAD = 0
     EXPLORE = 1
     REACH_ITEM = 2      # ha visto un item e sta cercando di raggiungerlo
@@ -15,41 +15,39 @@ class AgentState(Enum):
 
 
 class BaseStrategy(ABC):
-    def __init__(self, num_goal: int, storages: list, epsilon: float = 0.8):    #è necessario num_goal? per me no. gli agenti infatti non sanno quanti sono gli item e non gli interessa saperlo. --Antonio
-        self.num_goal = num_goal
+    def __init__(self, epsilon: float = 0.8):
         self.epsilon = epsilon 
         self.status = AgentState.EXPLORE
-        self.storages = storages
-        self.Path_target = []
+        self.path_target = []
+        self.min_energy_threshold = 20
 
-        # --Angelo-- proviamo col taboo cosi evitiamo cicli corti
-        self.tabu_list = deque(maxlen=10) # Ricorda le ultime 15 posizioni
+        self.tabu_list = deque(maxlen=10) # Ricorda le ultime 10 posizioni
         self.tabu_tenure = 10
     
     def _get_random_move(self) -> tuple[int, int]: 
+        # restituisce una mossa casuale tra le 4 direzioni cardinali
         return random.choice([(-1, 0), (1, 0), (0, -1), (0, 1)])
 
-    def _get_nearest_(self, current_pos: Position, positions: list[Position]) -> Position:
-        return min(positions, key=lambda p: current_pos.manhattan_distance_to(p)) if positions else None
-
-    def _find_nearest_target(self, current_pos, current_map, goal) -> tuple[int, int]:
-        rows, cols = current_map.grid.shape
-        targets = [Position(i, j) for i in range(rows) for j in range(cols) if current_map.grid[i, j] == goal]
+    def _find_nearest_target(self, current_pos : Position, local_map: Map, target_type: int) -> tuple[int, int]:
+        # restituisce le coordinate del target più vicino del tipo specificato, o (-1, -1) se non trovato
+        rows, cols = local_map.grid.shape
+        targets = [Position(i, j) for i in range(rows) for j in range(cols) if local_map.grid[i, j] == target_type]
         
         if not targets: return (-1, -1)
         
         nearest = min(targets, key=lambda t: current_pos.manhattan_distance_to(t))
         return (nearest.x, nearest.y)
 
-    # --Angelo--
-
     def _is_tabu(self, x, y) -> bool:
+        # controlla se la posizione (x, y) è nella tabu list
         return (x, y) in self.tabu_list
 
-    def update_tabu(self, current_pos: Position): 
+    def _update_tabu(self, current_pos: Position):
+        # aggiunge la posizione corrente alla tabu list, mantenendo la dimensione massima
         self.tabu_list.append((current_pos.x, current_pos.y))
 
-    def get_filtered_moves(self, position: Position, local_map: Map):
+    def _get_filtered_moves(self, position: Position, local_map: Map):
+        # restituisce le mosse valide (non muri) e preferisce quelle non tabu, se disponibili
         moves = [(-1, 0), (1, 0), (0, -1), (0, 1)]
         valid_moves, tabu_moves = [], []
         for dx, dy in moves:
@@ -58,10 +56,9 @@ class BaseStrategy(ABC):
                 if self._is_tabu(nx, ny): tabu_moves.append((dx, dy))
                 else: valid_moves.append((dx, dy))
         return valid_moves if valid_moves else tabu_moves
-    
-    # --Angelo--
 
-    def _get_Path(self, start: Position, local_map: Map, target: Position) -> list[Position]:
+    def _get_path(self, start: Position, local_map: Map, target: Position) -> list[Position]:
+        # restituisce una lista di posizioni che rappresentano il percorso più breve da start a target usando BFS, o [] se non raggiungibile
         rows, cols = local_map.grid.shape
         if not (0 <= target.x < rows and 0 <= target.y < cols) or \
            local_map.grid[target.x, target.y] == CellType.Wall:
@@ -96,6 +93,7 @@ class BaseStrategy(ABC):
         return []
     
     def _find_optimal_relay_spot(self, current_pos: Position, local_map: Map) -> Position:
+        # trova la posizione ottimale per il relay quando l'agente è a corto di energia, considerando spazio libero e distanza al centro dell'area esplorabile
         rows, cols = local_map.grid.shape
         empty_cells = []
     
@@ -149,80 +147,80 @@ class BaseStrategy(ABC):
         return spacious_spots[0]['pos']
     
     @abstractmethod
-    def explore_behavior(self, position: Position, local_map: Map) -> tuple[int, int]:
+    def _explore_behavior(self, position: Position, local_map: Map) -> tuple[int, int]:
+        # da implementare nelle strategie specifiche, definisce il comportamento di esplorazione (quando non ci sono target visibili)
         pass
 
-    def next_move(self, position: Position, local_map: Map, current_energy: int, carring: bool):
+    def next_move(self, position: Position, local_map: Map, current_energy: int, carring: bool) -> tuple[int, int]:
+        # restituisce la prossima mossa come (dx, dy) in base allo stato attuale, alla mappa locale e all'energia residua. 
+        # Gestisce anche la logica di transizione tra stati e l'aggiornamento della tabu list.
+        self._update_tabu(position)
+        
         # 1. GESTIONE MORTE
         if current_energy <= 0:
             self.status = AgentState.DEAD
             return None
 
-        # 2. GESTIONE EMERGENZA ENERGIA (Priorità assoluta)
-        if current_energy <= 20 and not carring:
+        # 2. GESTIONE EMERGENZA ENERGIA (priorità assoluta)
+        if current_energy <= self.min_energy_threshold and not carring:
             if self.status != AgentState.LOW_ENERGY:
                 self.status = AgentState.LOW_ENERGY
                 target = self._find_optimal_relay_spot(position, local_map)
-                self.Path_target = self._get_Path(position, local_map, target) if target else []
+                self.path_target = self._get_path(position, local_map, target) if target else []
 
         # 3. COMPORTAMENTO BASATO SULLO STATO
         if self.status == AgentState.LOW_ENERGY:
-            if self.Path_target:
-                nxt = self.Path_target.pop(0)
+            if self.path_target:
+                nxt = self.path_target.pop(0)
                 return (nxt.x - position.x, nxt.y - position.y)
-            return (0, 0) # Aspetta soccorsi nel punto di relay
+            return (0, 0)
 
         if self.status == AgentState.EXPLORE:
-            # Transizione a REACH_ITEM
             target_coords = self._find_nearest_target(position, local_map, CellType.Item)
             if target_coords != (-1, -1) and not carring:
                 self.status = AgentState.REACH_ITEM
-                # Invece di ricorsione, lasciamo che il prossimo tick gestisca REACH_ITEM
-                # o eseguiamo qui la logica di REACH_ITEM senza richiamare next_move
             else:
-                return self.explore_behavior(position, local_map)
+                return self._explore_behavior(position, local_map)
 
         if self.status == AgentState.REACH_ITEM:
             if carring: 
-                self.status, self.Path_target = AgentState.SEEK_STORAGE, []
+                self.status, self.path_target = AgentState.SEEK_STORAGE, []
                 return (0, 0)
 
-            if not self.Path_target:
+            if not self.path_target:
                 coords = self._find_nearest_target(position, local_map, CellType.Item)
                 if coords != (-1, -1):
-                    self.Path_target = self._get_Path(position, local_map, Position(*coords))
+                    self.path_target = self._get_path(position, local_map, Position(*coords))
 
-            if self.Path_target:
-                nxt = self.Path_target.pop(0)
+            if self.path_target:
+                nxt = self.path_target.pop(0)
                 return (nxt.x - position.x, nxt.y - position.y)
 
             self.status = AgentState.EXPLORE # l'item è stato preso da qualcun'altro
-            return self.explore_behavior(position, local_map)
+            return self._explore_behavior(position, local_map)
 
         if self.status == AgentState.SEEK_STORAGE:
             if not carring:
-                self.status, self.Path_target = AgentState.EXPLORE, []
+                self.status, self.path_target = AgentState.EXPLORE, []
                 return (0, 0)
             
-            if not self.Path_target:
+            if not self.path_target:
                 coords = self._find_nearest_target(position, local_map, CellType.Store)
                 if coords != (-1, -1):
-                    self.Path_target = self._get_Path(position, local_map, Position(*coords))
+                    self.path_target = self._get_path(position, local_map, Position(*coords))
             
-            if self.Path_target:
-                nxt = self.Path_target.pop(0)
+            if self.path_target:
+                nxt = self.path_target.pop(0)
                 return (nxt.x - position.x, nxt.y - position.y)
-            return self.explore_behavior(position, local_map)
+            return self._explore_behavior(position, local_map)
 
         return (0, 0)
 
     def collision_event(self, current_pos: Position, local_map: Map, agents: list) -> tuple[int, int]:
-        self.Path_target = []
+        # restituisce una mossa alternativa quando la mossa originale è bloccata da un altro agente, cercando di spostarsi lateralmente o indietro per evitare il blocco
+        self.path_target = []
         
-        directions = [
-            (-1, 0), (1, 0), (0, -1), (0, 1),   # Ortogonali
-            (-1, -1), (-1, 1), (1, -1), (1, 1)  # Diagonali
-        ]
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
         
         random.shuffle(directions)
         rows, cols = local_map.grid.shape
@@ -243,23 +241,23 @@ class BaseStrategy(ABC):
 
 
 class RandomStrategy(BaseStrategy):
-
-    def explore_behavior(self, position: Position, local_map: Map) -> tuple[int, int]:
-        moves = self.get_filtered_moves(position, local_map)
+    # strategia di base, si muove casualmente senza considerare la mappa o lo stato
+    def _explore_behavior(self, position: Position, local_map: Map) -> tuple[int, int]:
+        moves = self._get_filtered_moves(position, local_map)
         if moves:
             return random.choice(moves) if moves else (0, 0)
         return self._get_random_move()
-
-# Strategia Utile (potrebbe essere la base per le strategie più sofisticate)
+        
 class ScoutStrategy(BaseStrategy):
-    # dritto contro un muro poi cambia direzione
-    def __init__(self, num_goal: int, storages: list, epsilon: float = 0.8):
-        super().__init__(num_goal, storages, epsilon)
+    # esplorazione greedy, cerca di andare sempre in una direzione finché non incontra un ostacolo o una posizione tabu, poi cambia direzione casualmente
+    def __init__(self, epsilon: float = 0.8):
+        super().__init__(epsilon)
         self.current_direction = self._get_random_move()
 
-    def explore_behavior(self, position: Position, local_map: Map) -> tuple[int, int]:
+    def _explore_behavior(self, position: Position, local_map: Map) -> tuple[int, int]:
+        # con probabilità epsilon, ignora la direzione attuale e sceglie una mossa casuale filtrata (preferendo quelle non tabu)
         if random.random() < self.epsilon:
-            moves = self.get_filtered_moves(position, local_map)
+            moves = self._get_filtered_moves(position, local_map)
             return random.choice(moves) if moves else (0,0)
         
         rows, cols = local_map.grid.shape
@@ -270,47 +268,38 @@ class ScoutStrategy(BaseStrategy):
            local_map.grid[nx, ny] == CellType.Wall or \
            self._is_tabu(nx, ny):
             
-            moves = self.get_filtered_moves(position, local_map)
+            moves = self._get_filtered_moves(position, local_map)
             self.current_direction = random.choice(moves) if moves else self._get_random_move()
             return (0, 0)
             
         return self.current_direction
 
-# Strategia Utile (potrebbe essere la base per le strategie più sofisticate)
 class ScoutStrategy2(BaseStrategy):
-    # esplorazione greedy, sempre verso l'ignoto
-    def __init__(self, num_goal: int, storages: list, epsilon: float = 0.8):
-        super().__init__(num_goal, storages, epsilon)
-        self.current_direction = self._get_random_move()
-
-    def explore_behavior(self, position: Position, local_map: Map) -> tuple[int, int]:        
+    # simile a ScoutStrategy ma con una logica più intelligente per cambiare direzione: cerca di dirigersi verso le celle sconosciute più vicine, evitando quelle tabu e tenendo conto della presenza di altri agenti (se forniti)
+    def _explore_behavior(self, position: Position, local_map: Map) -> tuple[int, int]:        
         if random.random() < self.epsilon:
-            moves = self.get_filtered_moves(position, local_map)
+            moves = self._get_filtered_moves(position, local_map)
             return random.choice(moves) if moves else (0,0)
         
         t_coords = self._find_nearest_target(position, local_map, CellType.unknown)
         if t_coords != (-1, -1):
             target_pos = Position(*t_coords)
-            path = self._get_Path(position, local_map, target_pos)
+            path = self._get_path(position, local_map, target_pos)
             if path:
                 nxt = path[0]
                 if not self._is_tabu(nxt.x, nxt.y):
                     return (path[0].x - position.x, path[0].y - position.y)
                 
-        moves = self.get_filtered_moves(position, local_map)
+        moves = self._get_filtered_moves(position, local_map)
         return random.choice(moves) if moves else (0, 0)
-                
-        return (0, 0)
     
-
-# STRATEGIA BOCCIATA (facile bloccarsi in cicli ridondanti)
 class WallFollowerStrategy(BaseStrategy):
-# strategia da labirinto in cui si segue il muro, utile per struttura a corridoio
-    def __init__(self, num_goal: int, storages: list, epsilon: float = 0.0):
-        super().__init__(num_goal, storages, epsilon)
+# strategia da labirinto in cui si segue il muro, utile per struttura a corridoio. Bocciata perché è facile bloccarsi in cicli ridondanti
+    def __init__(self, epsilon: float = 0.0):
+        super().__init__(epsilon)
         self.dir = (0, 1)
 
-    def explore_behavior(self, position: Position, local_map: Map) -> tuple[int, int]:
+    def _explore_behavior(self, position: Position, local_map: Map) -> tuple[int, int]:
         rows, cols = local_map.grid.shape
         right_dir = (self.dir[1], -self.dir[0])
         rx, ry = position.x + right_dir[0], position.y + right_dir[1]
@@ -327,16 +316,16 @@ class WallFollowerStrategy(BaseStrategy):
             
         self.dir = (-self.dir[1], self.dir[0])
         return self.dir
-
-# STRATEGIA UTILE (ma in corridoi può portare stalli, meglio destinarla a singoli agenti esploratori)
+    
 class SparceStrategy(BaseStrategy):
-    # evitiamo sovrapposizioni massimizzando l'esplorazione totale
-    def __init__(self, num_goal: int, storages: list, epsilon: float = 0.2):
-        super().__init__(num_goal, storages, epsilon)
+    # strategia che cerca di mantenere una certa distanza dagli altri agenti, preferendo muoversi verso aree meno esplorate e meno frequentate dai compagni, per massimizzare la copertura della mappa e ridurre le sovrapposizioni nei percorsi di esplorazione.
+    # utile, ma in corridoi può portare stalli, meglio destinarla a singoli agenti esploratori
+    def __init__(self, epsilon: float = 0.2):
+        super().__init__(epsilon)
         self.teammates = []
 
-    def explore_behavior(self, position: Position, local_map: Map) -> tuple[int, int]:
-        moves = self.get_filtered_moves(position, local_map)
+    def _explore_behavior(self, position: Position, local_map: Map) -> tuple[int, int]:
+        moves = self._get_filtered_moves(position, local_map)
         if not self.teammates or random.random() < self.epsilon:
             return random.choice(moves) if moves else (0, 0)
 
@@ -353,25 +342,24 @@ class SparceStrategy(BaseStrategy):
         best_move = max(moves, key=lambda m: m[0]*vx + m[1]*vy)
         return best_move
 
-# Serve che gli agenti interagiscano in modo dinamico e efficace per spartirsi dinamicamente lo spazio di ricerca
-
-# UNIONE DI SPARCE E SCOUT2 (Sembra molto efficace per le operaie)
 class SwarmExplorerStrategy(BaseStrategy):
-    def __init__(self, num_goal: int, storages: list, epsilon: float = 0.1):
-        super().__init__(num_goal, storages, epsilon)
+    # Serve che gli agenti interagiscano in modo dinamico e efficace per spartirsi dinamicamente lo spazio di ricerca.
+    # UNIONE DI SPARCE E SCOUT2 (Sembra molto efficace per le operaie)
+    def __init__(self, epsilon: float = 0.1):
+        super().__init__(epsilon)
         self.teammates = []
 
-    def explore_behavior(self, position: Position, local_map: Map) -> tuple[int, int]:
+    def _explore_behavior(self, position: Position, local_map: Map) -> tuple[int, int]:
         if random.random() < self.epsilon:
             # --Tabu Filtered--
-            moves = self.get_filtered_moves(position, local_map)
+            moves = self._get_filtered_moves(position, local_map)
             return random.choice(moves) if moves else (0, 0)
 
         rows, cols = local_map.grid.shape
         unknowns = [Position(i, j) for i in range(rows) for j in range(cols) if local_map.grid[i, j] == CellType.unknown]
 
         if not unknowns:
-            moves = self.get_filtered_moves(position, local_map)
+            moves = self._get_filtered_moves(position, local_map)
             return random.choice(moves) if moves else (0, 0)
 
         best_target = None
@@ -395,9 +383,9 @@ class SwarmExplorerStrategy(BaseStrategy):
                 best_target = unk
 
         if best_target:
-            path = self._get_Path(position, local_map, best_target)
+            path = self._get_path(position, local_map, best_target)
             if path:
                 return (path[0].x - position.x, path[0].y - position.y)
 
-        moves = self.get_filtered_moves(position, local_map)
+        moves = self._get_filtered_moves(position, local_map)
         return random.choice(moves) if moves else (0, 0)

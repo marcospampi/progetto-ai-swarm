@@ -27,6 +27,13 @@ class Agente:
     def action(self, agents: list['Agente'], global_map: Map, stats : dict) -> None:
         self.visibility_sensor.update(self.position, self.local_map, global_map)
         self.communication_sensor.update(self, agents)
+
+        if hasattr(self.strategy, 'teammates'):
+            self.strategy.teammates = [
+                altro.position for altro in agents 
+                if altro is not self and altro.is_active and altro.strategy.status.value != 0
+            ]
+
         move_vector = self.strategy.next_move(self.position, self.local_map, self.energy, self.carrying)
 
         if move_vector is None: return
@@ -50,7 +57,6 @@ class Agente:
                     self.position.x = target_x
                     self.position.y = target_y
                     self.energy -= 1
-                    self.strategy.tabu_list.append(move_vector)
 
                 else:
                     move_alt = self.strategy.collision_event(self.position, self.local_map, agents)
@@ -58,7 +64,6 @@ class Agente:
                         self.position.x += move_alt[0]
                         self.position.y += move_alt[1]
                         self.energy -= 1
-                        self.strategy.tabu_list.append(move_alt)
 
         if global_map.grid[self.position.x, self.position.y] == CellType.Item and self.carrying == False:
             self.carrying = True
@@ -70,4 +75,4 @@ class Agente:
             stats['oggetti_recuperati'] += 1
 
     def print_map(self) -> None:
-        self.local_map.print_map()(0,0)
+        self.local_map.print_map()
